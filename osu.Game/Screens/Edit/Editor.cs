@@ -21,6 +21,7 @@ using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Framework.Logging;
+using osu.Framework.Platform;
 using osu.Framework.Screens;
 using osu.Framework.Testing;
 using osu.Framework.Threading;
@@ -110,6 +111,9 @@ namespace osu.Game.Screens.Edit
 
         [Resolved]
         private RealmAccess realm { get; set; }
+
+        [Resolved]
+        private Storage storage { get; set; }
 
         public readonly Bindable<EditorScreenMode> Mode = new Bindable<EditorScreenMode>();
 
@@ -1018,6 +1022,9 @@ namespace osu.Game.Screens.Edit
             lastSavedHash = changeHandler?.CurrentStateHash;
         }
 
+        private EditorMenuItem mountFilesItem;
+        private bool filesMounted;
+
         private List<MenuItem> createFileMenuItems() => new List<MenuItem>
         {
             createDifficultyCreationMenu(),
@@ -1028,8 +1035,27 @@ namespace osu.Game.Screens.Edit
             new EditorMenuItem(WebCommonStrings.ButtonsSave, MenuItemType.Standard, () => Save()),
             createExportMenu(),
             new OsuMenuItemSpacer(),
+            { mountFilesItem = new EditorMenuItem("Mount files", MenuItemType.Standard, mountFiles) },
             new EditorMenuItem(CommonStrings.Exit, MenuItemType.Standard, this.Exit)
         };
+
+        private void mountFiles()
+        {
+            FileMounter fileMounter = new FileMounter(realm, storage);
+
+            if (filesMounted == false)
+            {
+                if (editorBeatmap.BeatmapInfo.BeatmapSet != null) fileMounter.MountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet);
+                mountFilesItem.Text.Value = "Dismount files";
+                filesMounted = true;
+            }
+            else if (mountFilesItem.Text.Value == "Dismount files")
+            {
+                if (editorBeatmap.BeatmapInfo.BeatmapSet != null) fileMounter.DismountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet);
+                mountFilesItem.Text.Value = "Mount files";
+                filesMounted = false;
+            }
+        }
 
         private EditorMenuItem createExportMenu()
         {

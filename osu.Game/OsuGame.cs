@@ -56,6 +56,7 @@ using osu.Game.Overlays.Music;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.OSD;
 using osu.Game.Overlays.SkinEditor;
+using osu.Game.Overlays.SkinSelector;
 using osu.Game.Overlays.Toolbar;
 using osu.Game.Overlays.Volume;
 using osu.Game.Rulesets.Mods;
@@ -1119,6 +1120,7 @@ namespace osu.Game
             loadComponentSingleFile(beatmapSetOverlay = new BeatmapSetOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(wikiOverlay = new WikiOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(skinEditor = new SkinEditorOverlay(ScreenContainer), overlayContent.Add, true);
+            loadComponentSingleFile(skinSelector = new SkinSelectorOverlay(), overlayContent.Add, true);
 
             loadComponentSingleFile(new LoginOverlay
             {
@@ -1427,6 +1429,10 @@ namespace osu.Game
                     skinEditor.ToggleVisibility();
                     return true;
 
+                case GlobalAction.ToggleSkinSelector:
+                    skinSelector.ToggleVisibility();
+                    return true;
+
                 case GlobalAction.ResetInputSettings:
                     Host.ResetInputHandlers();
                     frameworkConfig.GetBindable<ConfineMouseMode>(FrameworkSetting.ConfineMouseMode).SetDefault();
@@ -1483,6 +1489,7 @@ namespace osu.Game
         #region Inactive audio dimming
 
         private readonly BindableDouble inactiveVolumeFade = new BindableDouble();
+        private SkinSelectorOverlay skinSelector;
 
         private void updateActiveState(bool isActive)
         {

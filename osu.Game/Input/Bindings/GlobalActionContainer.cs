@@ -111,6 +111,8 @@ namespace osu.Game.Input.Bindings
 
             new KeyBinding(InputKey.F10, GlobalAction.ToggleGameplayMouseButtons),
             new KeyBinding(InputKey.F12, GlobalAction.TakeScreenshot),
+
+            new KeyBinding(new [] { InputKey.Control, InputKey.Space }, GlobalAction.ToggleSkinSelector)
         };
 
         private static IEnumerable<KeyBinding> overlayKeyBindings => new[]
@@ -476,6 +478,9 @@ namespace osu.Game.Input.Bindings
 
         [LocalisableDescription(typeof(GlobalActionKeyBindingStrings), nameof(GlobalActionKeyBindingStrings.EditorCycleGridType))]
         EditorCycleGridType,
+
+        [LocalisableDescription(typeof(GlobalActionKeyBindingStrings), nameof(GlobalActionKeyBindingStrings.EditorCycleGridType))]
+        ToggleSkinSelector,
     }
 
     public enum GlobalActionCategory

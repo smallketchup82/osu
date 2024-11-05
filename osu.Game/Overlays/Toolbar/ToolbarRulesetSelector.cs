@@ -14,7 +14,9 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
+using osu.Game.Database;
 using osu.Game.Rulesets;
+using osu.Game.Skinning;
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;
@@ -27,6 +29,12 @@ namespace osu.Game.Overlays.Toolbar
 
         [Resolved]
         private MusicController musicController { get; set; }
+
+        [Resolved]
+        private SkinManager skinManager { get; set; }
+
+        [Resolved]
+        private RealmAccess realm { get; set; }
 
         private readonly Dictionary<RulesetInfo, Sample> rulesetSelectionSample = new Dictionary<RulesetInfo, Sample>();
         private readonly Dictionary<RulesetInfo, SampleChannel> rulesetSelectionChannel = new Dictionary<RulesetInfo, SampleChannel>();
@@ -72,6 +80,7 @@ namespace osu.Game.Overlays.Toolbar
             defaultSelectSample = audio.Samples.Get(@"UI/default-select");
 
             Current.ValueChanged += playRulesetSelectionSample;
+            Current.ValueChanged += switchToAndSaveDefaultSkin;
         }
 
         protected override void LoadComplete()
@@ -123,6 +132,17 @@ namespace osu.Game.Overlays.Toolbar
             rulesetSelectionChannel[r.NewValue] = channel;
             channel.Play();
             musicController?.DuckMomentarily(500, new DuckParameters { DuckDuration = 0 });
+        }
+
+        private void switchToAndSaveDefaultSkin(ValueChangedEvent<RulesetInfo> r)
+        {
+            if (r.OldValue == null)
+                return;
+
+            r.OldValue.DefaultSkin = skinManager.CurrentSkinInfo.Value.PerformRead(s => s);
+
+            if (r.NewValue.DefaultSkin != null)
+                skinManager.CurrentSkinInfo.Value = r.NewValue.DefaultSkin.ToLive(realm);
         }
 
         public override bool HandleNonPositionalInput => !Current.Disabled && base.HandleNonPositionalInput;

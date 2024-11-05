@@ -4,6 +4,7 @@
 using System;
 using JetBrains.Annotations;
 using osu.Game.Rulesets.Difficulty;
+using osu.Game.Skinning;
 using Realms;
 
 namespace osu.Game.Rulesets
@@ -25,6 +26,11 @@ namespace osu.Game.Rulesets
         /// Stores the last applied <see cref="DifficultyCalculator.Version"/>
         /// </summary>
         public int LastAppliedDifficultyVersion { get; set; }
+
+        /// <summary>
+        /// The default skin to be used for this ruleset
+        /// </summary>
+        public SkinInfo? DefaultSkin { get; set; }
 
         public RulesetInfo(string shortName, string name, string instantiationInfo, int onlineID)
         {

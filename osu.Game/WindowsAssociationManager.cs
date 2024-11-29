@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -11,12 +12,18 @@ using osu.Framework.Localisation;
 using osu.Framework.Logging;
 using osu.Game.Localisation;
 
-namespace osu.Desktop.Windows
+namespace osu.Game
 {
     [SupportedOSPlatform("windows")]
     public static class WindowsAssociationManager
     {
         private const string software_classes = @"Software\Classes";
+
+        private static readonly string icon_directory = Path.GetDirectoryName(typeof(WindowsAssociationManager).Assembly.Location)!;
+
+        public static string Lazer => Path.Join(icon_directory, "lazer.ico");
+
+        public static string Beatmap => Path.Join(icon_directory, "beatmap.ico");
 
         /// <summary>
         /// Sub key for setting the icon.
@@ -28,7 +35,7 @@ namespace osu.Desktop.Windows
         /// Sub key for setting the command line that the shell invokes.
         /// https://learn.microsoft.com/en-us/windows/win32/com/shell
         /// </summary>
-        internal const string SHELL_OPEN_COMMAND = @"Shell\Open\Command";
+        public const string SHELL_OPEN_COMMAND = @"Shell\Open\Command";
 
         private static readonly string exe_path = Path.ChangeExtension(typeof(WindowsAssociationManager).Assembly.Location, ".exe").Replace('/', '\\');
 
@@ -40,16 +47,16 @@ namespace osu.Desktop.Windows
 
         private static readonly FileAssociation[] file_associations =
         {
-            new FileAssociation(@".osz", WindowsAssociationManagerStrings.OsuBeatmap, Icons.Beatmap),
-            new FileAssociation(@".olz", WindowsAssociationManagerStrings.OsuBeatmap, Icons.Beatmap),
-            new FileAssociation(@".osr", WindowsAssociationManagerStrings.OsuReplay, Icons.Beatmap),
-            new FileAssociation(@".osk", WindowsAssociationManagerStrings.OsuSkin, Icons.Beatmap),
+            new FileAssociation(@".osz", WindowsAssociationManagerStrings.OsuBeatmap, Beatmap),
+            new FileAssociation(@".olz", WindowsAssociationManagerStrings.OsuBeatmap, Beatmap),
+            new FileAssociation(@".osr", WindowsAssociationManagerStrings.OsuReplay, Beatmap),
+            new FileAssociation(@".osk", WindowsAssociationManagerStrings.OsuSkin, Beatmap),
         };
 
         private static readonly UriAssociation[] uri_associations =
         {
-            new UriAssociation(@"osu", WindowsAssociationManagerStrings.OsuProtocol, Icons.Lazer),
-            new UriAssociation(@"osump", WindowsAssociationManagerStrings.OsuMultiplayer, Icons.Lazer),
+            new UriAssociation(@"osu", WindowsAssociationManagerStrings.OsuProtocol, Lazer),
+            new UriAssociation(@"osump", WindowsAssociationManagerStrings.OsuMultiplayer, Lazer),
         };
 
         /// <summary>
@@ -157,6 +164,14 @@ namespace osu.Desktop.Windows
                 b.UnbindAll();
                 return b.Value;
             }
+        }
+
+        /// <summary>
+        /// Opens the Windows settings for file associations.
+        /// </summary>
+        public static void OpenWindowsSettings()
+        {
+            Process.Start("ms-settings:defaultapps");
         }
 
         #region Native interop

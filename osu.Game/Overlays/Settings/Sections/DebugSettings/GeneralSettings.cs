@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Framework.Localisation;
@@ -17,11 +18,21 @@ namespace osu.Game.Overlays.Settings.Sections.DebugSettings
     {
         protected override LocalisableString Header => CommonStrings.General;
 
+        private SettingsCheckbox associationSetting = null!;
+
         [BackgroundDependencyLoader]
         private void load(FrameworkDebugConfigManager config, FrameworkConfigManager frameworkConfig, IPerformFromScreenRunner? performer)
         {
             Children = new Drawable[]
             {
+                associationSetting = new SettingsCheckbox
+                {
+                    LabelText = "Associate files with osu!",
+                    Keywords = new[] { @"association", @"file", @"extension", @"osu", @"osz", @"osk" },
+                    TooltipText = "Associate osu! related files with osu!(lazer)",
+                    Current = new Bindable<bool>(true),
+                    ClassicDefault = true
+                },
                 new SettingsCheckbox
                 {
                     LabelText = DebugSettingsStrings.ShowLogOverlay,
@@ -43,6 +54,8 @@ namespace osu.Game.Overlays.Settings.Sections.DebugSettings
                     Action = () => performer?.PerformFromScreen(menu => menu.Push(new LatencyCertifierScreen()))
                 }
             };
+
+            associationSetting.SetNoticeText("This setting should only be disabled if you are having issues with associations. Use your operating system's settings to manage associations where possible.", true);
         }
     }
 }

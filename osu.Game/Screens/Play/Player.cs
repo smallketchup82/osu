@@ -15,6 +15,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Input;
 using osu.Framework.Logging;
 using osu.Framework.Screens;
 using osu.Framework.Threading;
@@ -135,6 +136,9 @@ namespace osu.Game.Screens.Play
 
         [Resolved]
         private MusicController musicController { get; set; }
+
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; }
 
         [Resolved]
         private OsuGameBase game { get; set; }
@@ -380,6 +384,7 @@ namespace osu.Game.Screens.Play
             {
                 updateGameplayState();
                 updateSampleDisabledState();
+                updateHapticState();
             });
 
             DrawableRuleset.FrameStableClock.IsCatchingUp.BindValueChanged(_ => updateSampleDisabledState());
@@ -555,6 +560,12 @@ namespace osu.Game.Screens.Play
         private void updateSampleDisabledState()
         {
             samplePlaybackDisabled.Value = DrawableRuleset.FrameStableClock.IsCatchingUp.Value || GameplayClockContainer.IsPaused.Value;
+        }
+
+        private void updateHapticState()
+        {
+            if (DrawableRuleset.FrameStableClock.IsCatchingUp.Value || GameplayClockContainer.IsPaused.Value)
+                hapticHandler.ReleaseAll();
         }
 
         private void updatePauseOnFocusLostState()

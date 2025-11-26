@@ -11,6 +11,7 @@ using osuTK.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Skinning;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Input;
 
 namespace osu.Game.Rulesets.Osu.Objects.Drawables
 {
@@ -19,6 +20,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         public const double ANIM_DURATION = 150;
 
         public const float DEFAULT_TICK_SIZE = 16;
+
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; }
 
         protected DrawableSlider DrawableSlider => (DrawableSlider)ParentHitObject;
 
@@ -94,6 +98,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                 case ArmedState.Hit:
                     this.FadeOut(ANIM_DURATION, Easing.OutQuint);
                     this.ScaleTo(Scale * 1.5f, ANIM_DURATION, Easing.Out);
+                    hapticHandler.PlayTransient(0.25f, 1f);
                     break;
             }
         }

@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Input;
 using osu.Framework.Utils;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Skinning.Default;
@@ -24,6 +25,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         [CanBeNull]
         public Slider Slider => DrawableSlider?.HitObject;
+
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; }
 
         public DrawableSlider DrawableSlider => (DrawableSlider)ParentHitObject;
 
@@ -109,6 +113,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
                 case ArmedState.Hit:
                     this.FadeOut(animDuration, Easing.Out);
+                    hapticHandler.PlayTransient(1f, 1f);
                     break;
             }
         }

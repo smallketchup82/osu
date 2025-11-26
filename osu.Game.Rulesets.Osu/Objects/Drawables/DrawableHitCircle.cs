@@ -4,9 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
@@ -36,6 +38,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         protected override IEnumerable<Drawable> DimmablePieces => new[] { CirclePiece };
 
         Drawable IHasApproachCircle.ApproachCircle => ApproachCircle;
+
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; } = null!;
 
         private Container scaleContainer = null!;
         private ShakeContainer shakeContainer = null!;
@@ -211,6 +216,19 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             {
                 default:
                     ApproachCircle.FadeOut();
+
+                    float hitObjectVolume = HitObject.Samples.First().Volume;
+
+                    // Volume is 0-100 in hitObject, but 0-1 in haptics
+                    hitObjectVolume /= 100f;
+
+                    // Clamp and scale accordingly, the minimum intensity should be 0.8f, and the volume should only affect the other 0.2f
+                    // float intensity = Math.Clamp(hitObjectVolume, 0, 1) * 0.2f + 0.8f;
+
+                    hapticHandler.PlayTransient(hitObjectVolume, 1f);
+
+                    if (this is DrawableSliderHead)
+                        hapticHandler.StartSlider();
                     break;
 
                 case ArmedState.Idle:

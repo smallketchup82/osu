@@ -11,6 +11,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Input;
 using osu.Framework.Layout;
 using osu.Game.Audio;
 using osu.Game.Graphics.Containers;
@@ -59,6 +60,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         [CanBeNull]
         public PlaySliderBody SliderBody => Body.Drawable as PlaySliderBody;
+
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; }
 
         public IBindable<int> PathVersion => pathVersion;
         private readonly Bindable<int> pathVersion = new Bindable<int>();
@@ -246,11 +250,24 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                 {
                     // keep the sliding sample playing at the current tracking position
                     if (!slidingSample.RequestedPlaying)
+                    {
                         slidingSample.Play();
+                        double sliderSampleVolume = slidingSample.Volume.Value;
+                        float sliderVolume = Math.Clamp((float)sliderSampleVolume, 0, 1) * IHapticHandler.DEFAULT_SLIDER_INTENSITY;
+                        hapticHandler.StartSlider();
+                    }
+
                     slidingSample.Balance.Value = CalculateSamplePlaybackBalance(CalculateDrawableRelativePosition(Ball));
                 }
                 else if (slidingSample.IsPlaying || slidingSample.RequestedPlaying)
+                {
                     slidingSample.Stop();
+                    hapticHandler.StopSlider();
+                    int sampleVolume = HitObject.TailSamples.First().Volume;
+                    float volume = Math.Clamp(sampleVolume / 100f, 0, 1);
+
+                    hapticHandler.PlayTransient(volume, 1.0f);
+                }
             }
         }
 
@@ -329,8 +346,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
             // rather than doing it this way, we should probably attach the sample to the tail circle.
             // this can only be done if we stop using LastTick.
-            if (!TailCircle.SamplePlaysOnlyOnHit || TailCircle.IsHit)
-                base.PlaySamples();
+            if (!TailCircle.SamplePlaysOnlyOnHit || TailCircle.IsHit) base.PlaySamples();
         }
 
         protected override void UpdateInitialTransforms()

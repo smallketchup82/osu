@@ -227,8 +227,16 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
                     hapticHandler.PlayTransient(hitObjectVolume, 1f);
 
-                    if (this is DrawableSliderHead)
-                        hapticHandler.StartSlider();
+                    // if (this is DrawableSliderHead head)
+                    // {
+                    //     int sliderSampleVolume = head.DrawableSlider.HitObject.CreateSlidingSamples().First().Volume;
+                    //
+                    //     // Volume is 0-100 in hitObject, but 0-1 in haptics. Plus, we want to limit the max intensity to 0.3f for sliders
+                    //     float sliderVolume = Math.Clamp(sliderSampleVolume / 100f, 0, 1) * 0.3f;
+                    //
+                    //     hapticHandler.StartSlider(sliderVolume);
+                    // }
+
                     break;
 
                 case ArmedState.Idle:

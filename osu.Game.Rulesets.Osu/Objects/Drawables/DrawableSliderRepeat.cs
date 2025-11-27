@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
@@ -113,7 +114,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
                 case ArmedState.Hit:
                     this.FadeOut(animDuration, Easing.Out);
-                    hapticHandler.PlayTransient(1f, 1f);
+                    int sampleVolume = HitObject.Samples.First().Volume;
+                    float volume = Math.Clamp(sampleVolume / 100f, 0, 1);
+                    hapticHandler.PlayTransient(volume, 1f);
                     break;
             }
         }

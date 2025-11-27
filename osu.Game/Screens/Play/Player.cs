@@ -388,6 +388,7 @@ namespace osu.Game.Screens.Play
             });
 
             DrawableRuleset.FrameStableClock.IsCatchingUp.BindValueChanged(_ => updateSampleDisabledState());
+            DrawableRuleset.FrameStableClock.IsCatchingUp.BindValueChanged(_ => updateHapticState());
 
             DrawableRuleset.HasReplayLoaded.BindValueChanged(_ => updateGameplayState());
 
@@ -1193,6 +1194,7 @@ namespace osu.Game.Screens.Play
             // Eagerly clean these up as disposal of child components is asynchronous and may leave sounds playing beyond user expectations.
             failAnimationContainer?.Stop();
             PauseOverlay?.StopAllSamples();
+            hapticHandler.ReleaseAll();
 
             if (LoadedBeatmapSuccessfully && !GameplayState.HasPassed)
             {

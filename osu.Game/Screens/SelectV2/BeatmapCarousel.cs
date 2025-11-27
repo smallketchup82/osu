@@ -18,6 +18,7 @@ using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Pooling;
+using osu.Framework.Input;
 using osu.Framework.Localisation;
 using osu.Framework.Threading;
 using osu.Framework.Utils;
@@ -55,6 +56,8 @@ namespace osu.Game.Screens.SelectV2
         public const float SPACING = 3f;
 
         private IBindableList<BeatmapSetInfo> detachedBeatmaps = null!;
+
+        private IHapticHandler hapticHandler = null!;
 
         private readonly LoadingLayer loading;
 
@@ -119,10 +122,11 @@ namespace osu.Game.Screens.SelectV2
         }
 
         [BackgroundDependencyLoader]
-        private void load(BeatmapStore beatmapStore, AudioManager audio, OsuConfigManager config, CancellationToken? cancellationToken)
+        private void load(BeatmapStore beatmapStore, AudioManager audio, OsuConfigManager config, CancellationToken? cancellationToken, IHapticHandler hapticHandler)
         {
             setupPools();
             detachedBeatmaps = beatmapStore.GetBeatmapSets(cancellationToken);
+            this.hapticHandler = hapticHandler;
             loadSamples(audio);
 
             config.BindWith(OsuSetting.RandomSelectAlgorithm, randomAlgorithm);
@@ -406,8 +410,14 @@ namespace osu.Game.Screens.SelectV2
             }
             finally
             {
+                playHapticFeedback();
                 playActivationSound(item);
             }
+        }
+
+        private void playHapticFeedback()
+        {
+            hapticHandler.PlayTransient(0.75f, 1f);
         }
 
         protected override void HandleItemSelected(object? model)

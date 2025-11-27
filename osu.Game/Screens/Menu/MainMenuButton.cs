@@ -19,6 +19,7 @@ using osu.Framework.Extensions.Color4Extensions;
 using osu.Game.Graphics.Containers;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.Input.StateChanges;
 using osu.Framework.Localisation;
@@ -78,6 +79,9 @@ namespace osu.Game.Screens.Menu
         private Sample? sampleClick;
         private Sample? sampleHover;
         private SampleChannel? sampleChannel;
+
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; } = null!;
 
         public override bool IsPresent => base.IsPresent
                                           // Allow keyboard interaction based on state rather than waiting for delayed animations.
@@ -295,6 +299,8 @@ namespace osu.Game.Screens.Menu
         {
             sampleChannel = sampleClick?.GetChannel();
             sampleChannel?.Play();
+
+            hapticHandler.ButtonPress();
 
             clickAction?.Invoke(this, e);
 

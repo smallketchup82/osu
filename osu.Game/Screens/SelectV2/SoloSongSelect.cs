@@ -9,6 +9,7 @@ using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.UserInterface;
@@ -50,6 +51,9 @@ namespace osu.Game.Screens.SelectV2
 
         [Resolved]
         private OsuGame? game { get; set; }
+
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; } = null!;
 
         private Sample? sampleConfirmSelection { get; set; }
 
@@ -123,6 +127,7 @@ namespace osu.Game.Screens.SelectV2
                 Mods.Value = mods;
             }
 
+            hapticHandler.Crash();
             sampleConfirmSelection?.Play();
 
             this.Push(playerLoader = new PlayerLoader(createPlayer));

@@ -16,6 +16,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
+using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.Input.StateChanges;
 using osu.Framework.Utils;
@@ -106,6 +107,9 @@ namespace osu.Game.Screens.Menu
         private const float triangles_paused_velocity = 0.5f;
 
         public override bool IsPresent => base.IsPresent || Scheduler.HasPendingTasks;
+
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; }
 
         public OsuLogo()
         {
@@ -424,6 +428,7 @@ namespace osu.Game.Screens.Menu
                 StopSamplePlayback();
                 sampleClickChannel = sampleClick.GetChannel();
                 sampleClickChannel.Play();
+                hapticHandler.PlayTransient(1.0f, 0.75f);
             }
         }
 

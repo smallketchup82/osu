@@ -254,7 +254,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                         slidingSample.Play();
                         double sliderSampleVolume = slidingSample.Volume.Value;
                         float sliderVolume = Math.Clamp((float)sliderSampleVolume, 0, 1) * IHapticHandler.DEFAULT_SLIDER_INTENSITY;
-                        hapticHandler.StartSlider();
+                        hapticHandler.StartSlider(sliderVolume);
                     }
 
                     slidingSample.Balance.Value = CalculateSamplePlaybackBalance(CalculateDrawableRelativePosition(Ball));

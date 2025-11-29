@@ -17,4 +17,6 @@
 		Care needs to be taken to ensure runtime permission checks target the correct permission for the API level.
 	-->
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+    <!-- for vibration -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 </manifest>

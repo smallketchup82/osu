@@ -9,6 +9,7 @@ using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
+using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
 using osuTK.Input;
@@ -23,8 +24,13 @@ namespace osu.Game.Graphics.UserInterface
     {
         public Bindable<bool> Enabled = new Bindable<bool>(true);
 
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; }
+
         private Sample sampleClick;
         private Sample sampleClickDisabled;
+
+        public bool ShouldPlayHaptics { get; set; } = true;
 
         private readonly MouseButton[] buttons;
 
@@ -54,8 +60,13 @@ namespace osu.Game.Graphics.UserInterface
 
         protected override bool OnClick(ClickEvent e)
         {
-            if (buttons.Contains(e.Button))
-                PlayClickSample();
+            if (!buttons.Contains(e.Button))
+                return base.OnClick(e);
+
+            if (ShouldPlayHaptics)
+                hapticHandler.ButtonPress();
+
+            PlayClickSample();
 
             return base.OnClick(e);
         }

@@ -28,7 +28,9 @@ namespace osu.Game.Graphics.Containers
 
         protected override Container<Drawable> Content => content;
 
-        protected virtual HoverSounds CreateHoverSounds(HoverSampleSet sampleSet) => new HoverClickSounds(sampleSet) { Enabled = { BindTarget = Enabled } };
+        public bool EnableHaptics { get; set; } = true;
+
+        protected virtual HoverSounds CreateHoverSounds(HoverSampleSet sampleSet) => new HoverClickSounds(sampleSet) { Enabled = { BindTarget = Enabled }, ShouldPlayHaptics = EnableHaptics };
 
         public OsuClickableContainer(HoverSampleSet sampleSet = HoverSampleSet.Default)
         {

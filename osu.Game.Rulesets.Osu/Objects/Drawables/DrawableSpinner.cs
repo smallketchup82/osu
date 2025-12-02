@@ -175,7 +175,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             if (!tracking.NewValue)
             {
                 // stopped spinning, stop continuous haptics
-                hapticHandler.ReleaseAll();
+                hapticHandler.ReleaseContinuous();
             }
         }
 

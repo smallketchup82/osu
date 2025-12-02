@@ -27,6 +27,8 @@ namespace osu.Game.Graphics.UserInterface
             set => SpriteText.Text = value;
         }
 
+        public bool EnableHaptics { get; set; } = true;
+
         private Color4? backgroundColour;
 
         /// <summary>
@@ -73,6 +75,8 @@ namespace osu.Game.Graphics.UserInterface
 
         private readonly Box flashLayer;
 
+        private readonly HoverClickSounds? hoverClickSounds;
+
         protected OsuButton(HoverSampleSet? hoverSounds = HoverSampleSet.Button)
         {
             Height = 40;
@@ -116,7 +120,7 @@ namespace osu.Game.Graphics.UserInterface
             });
 
             if (hoverSounds.HasValue)
-                AddInternal(new HoverClickSounds(hoverSounds.Value) { Enabled = { BindTarget = Enabled } });
+                AddInternal(hoverClickSounds = new HoverClickSounds(hoverSounds.Value) { Enabled = { BindTarget = Enabled } });
         }
 
         [BackgroundDependencyLoader]
@@ -130,6 +134,10 @@ namespace osu.Game.Graphics.UserInterface
             base.LoadComplete();
 
             Colour = dimColour;
+
+            if (hoverClickSounds != null)
+                hoverClickSounds.ShouldPlayHaptics = EnableHaptics;
+
             Enabled.BindValueChanged(_ => this.FadeColour(dimColour, 200, Easing.OutQuint));
         }
 

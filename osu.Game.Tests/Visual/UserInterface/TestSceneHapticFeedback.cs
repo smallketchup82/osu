@@ -9,6 +9,7 @@ using osu.Framework.Input;
 using osu.Framework.Testing;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
 using osuTK;
 
@@ -19,10 +20,12 @@ namespace osu.Game.Tests.Visual.UserInterface
         [Resolved]
         private IHapticHandler hapticHandler { get; set; } = null!;
 
-        private readonly Bindable<bool> continuousHapticEnabled = new Bindable<bool>();
+        private readonly BindableBool continuousHapticEnabled = new BindableBool();
         private readonly BindableNumber<float> transientIntensity = new BindableNumber<float>(1.0f) { MinValue = 0.0f, MaxValue = 1.0f, Precision = 0.1f };
         private readonly BindableNumber<float> transientSharpness = new BindableNumber<float>(1.0f) { MinValue = 0.0f, MaxValue = 1.0f, Precision = 0.1f };
         private readonly BindableNumber<float> crashDuration = new BindableNumber<float>(1.0f) { MinValue = 0.1f, MaxValue = 10.0f, Precision = 0.1f };
+
+        private readonly BindableBool toggleState = new BindableBool();
 
         [SetUpSteps]
         public virtual void SetUpSteps() => AddStep("Create components", () =>
@@ -65,18 +68,64 @@ namespace osu.Game.Tests.Visual.UserInterface
                     },
                     new SettingsButton
                     {
-                        Text = "Button Press",
-                        Action = () => hapticHandler.PlayTransient(transientIntensity.Value, transientSharpness.Value)
+                        Text = "Trigger Transient Haptic",
+                        Action = () => hapticHandler.PlayTransient(transientIntensity.Value, transientSharpness.Value),
+                        EnableHaptics = false
                     },
                     new SettingsButton
                     {
                         Text = "Toggle Continuous Haptic",
                         Action = () => continuousHapticEnabled.Value = !continuousHapticEnabled.Value,
+                        EnableHaptics = false
+                    },
+                    new OsuSpriteText
+                    {
+                        Text = "Helpers",
+                        Font = OsuFont.Default.With(size: 30),
+                        Origin = Anchor.TopCentre,
+                        Anchor = Anchor.TopCentre,
+                    },
+                    new SettingsButton
+                    {
+                        Text = "Button Press",
+                        Action = () => hapticHandler.ButtonPress(),
+                        EnableHaptics = false
+                    },
+                    new SettingsButton
+                    {
+                        Text = "Selection Changed",
+                        Action = () => hapticHandler.SelectionChanged(),
+                        EnableHaptics = false
+                    },
+                    new OsuCheckbox
+                    {
+                        LabelText = "Toggle On/Off",
+                        Current = toggleState,
+                        EnableHaptics = false
+                    },
+                    new SettingsButton
+                    {
+                        Text = "Success Notification",
+                        Action = () => hapticHandler.SuccessNotification(),
+                        EnableHaptics = false
+                    },
+                    new SettingsButton
+                    {
+                        Text = "Warning Notification",
+                        Action = () => hapticHandler.WarningNotification(),
+                        EnableHaptics = false
+                    },
+                    new SettingsButton
+                    {
+                        Text = "Error Notification",
+                        Action = () => hapticHandler.ErrorNotification(),
+                        EnableHaptics = false
                     },
                     new SettingsButton
                     {
                         Text = "Crash",
-                        Action = () => hapticHandler.Crash(transientIntensity.Value, transientSharpness.Value, crashDuration.Value)
+                        Action = () => hapticHandler.Crash(transientIntensity.Value, transientSharpness.Value, crashDuration.Value),
+                        EnableHaptics = false
                     },
                 }
             };
@@ -87,9 +136,17 @@ namespace osu.Game.Tests.Visual.UserInterface
             continuousHapticEnabled.BindValueChanged(enabled =>
             {
                 if (enabled.NewValue)
-                    hapticHandler.StartSlider(transientIntensity.Value, transientSharpness.Value);
+                    hapticHandler.StartContinuous(transientIntensity.Value, transientSharpness.Value);
                 else
-                    hapticHandler.StopSlider();
+                    hapticHandler.ReleaseContinuous();
+            });
+
+            toggleState.BindValueChanged(state =>
+            {
+                if (state.NewValue)
+                    hapticHandler.ToggleOn();
+                else
+                    hapticHandler.ToggleOff();
             });
         });
     }

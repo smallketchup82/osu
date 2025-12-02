@@ -566,7 +566,7 @@ namespace osu.Game.Screens.Play
         private void updateHapticState()
         {
             if (DrawableRuleset.FrameStableClock.IsCatchingUp.Value || GameplayClockContainer.IsPaused.Value)
-                hapticHandler.ReleaseAll();
+                hapticHandler.ReleaseContinuous();
         }
 
         private void updatePauseOnFocusLostState()
@@ -1194,7 +1194,7 @@ namespace osu.Game.Screens.Play
             // Eagerly clean these up as disposal of child components is asynchronous and may leave sounds playing beyond user expectations.
             failAnimationContainer?.Stop();
             PauseOverlay?.StopAllSamples();
-            hapticHandler.ReleaseAll();
+            hapticHandler.ReleaseContinuous();
 
             if (LoadedBeatmapSuccessfully && !GameplayState.HasPassed)
             {

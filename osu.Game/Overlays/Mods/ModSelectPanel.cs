@@ -11,6 +11,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Framework.Utils;
@@ -64,6 +65,9 @@ namespace osu.Game.Overlays.Mods
 
         [Resolved]
         protected OverlayColourProvider ColourProvider { get; private set; } = null!;
+
+        [Resolved]
+        protected IHapticHandler HapticHandler { get; private set; } = null!;
 
         private readonly OsuSpriteText titleText;
         private readonly OsuSpriteText descriptionText;
@@ -187,11 +191,20 @@ namespace osu.Game.Overlays.Mods
             Active.BindValueChanged(_ =>
             {
                 playStateChangeSamples();
+                playStateChangedHaptics();
                 UpdateState();
             });
 
             UpdateState();
             FinishTransforms(true);
+        }
+
+        private void playStateChangedHaptics()
+        {
+            if (Active.Value)
+                HapticHandler.ToggleOn();
+            else
+                HapticHandler.ToggleOff();
         }
 
         private void playStateChangeSamples()

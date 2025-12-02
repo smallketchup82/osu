@@ -9,6 +9,7 @@ using osu.Framework.Audio.Sample;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
+using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Graphics.Containers;
@@ -21,6 +22,8 @@ namespace osu.Game.Graphics.UserInterface
         /// Whether to play sounds when the state changes as a result of user interaction.
         /// </summary>
         protected virtual bool PlaySoundsOnUserChange => true;
+
+        public bool EnableHaptics { get; set; } = true;
 
         public LocalisableString LabelText
         {
@@ -42,6 +45,9 @@ namespace osu.Game.Graphics.UserInterface
         }
 
         protected readonly Nub Nub;
+
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; } = null!;
 
         protected readonly OsuTextFlowContainer LabelTextFlowContainer;
         private Sample sampleChecked;
@@ -118,6 +124,13 @@ namespace osu.Game.Graphics.UserInterface
                 else
                     sampleUnchecked?.Play();
             }
+
+            if (!EnableHaptics) return;
+
+            if (value)
+                hapticHandler.ToggleOn();
+            else
+                hapticHandler.ToggleOff();
         }
     }
 }

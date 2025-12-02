@@ -410,14 +410,27 @@ namespace osu.Game.Screens.SelectV2
             }
             finally
             {
-                playHapticFeedback();
+                playHapticFeedback(item);
                 playActivationSound(item);
             }
         }
 
-        private void playHapticFeedback()
+        private void playHapticFeedback(CarouselItem item)
         {
-            hapticHandler.PlayTransient(0.75f, 1f);
+            switch (item.Model)
+            {
+                case GroupDefinition:
+                    hapticHandler.ButtonPress();
+                    break;
+
+                case GroupedBeatmapSet:
+                    hapticHandler.ButtonPress();
+                    break;
+
+                case GroupedBeatmap:
+                    hapticHandler.SelectionChanged();
+                    break;
+            }
         }
 
         protected override void HandleItemSelected(object? model)

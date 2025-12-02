@@ -12,6 +12,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Textures;
+using osu.Framework.Input;
 using osu.Framework.Logging;
 using osu.Framework.Screens;
 using osu.Framework.Timing;
@@ -124,6 +125,9 @@ namespace osu.Game.Screens.Menu
             [Resolved]
             private OsuGameBase game { get; set; }
 
+            [Resolved]
+            private IHapticHandler hapticHandler { get; set; }
+
             [BackgroundDependencyLoader]
             private void load()
             {
@@ -218,23 +222,23 @@ namespace osu.Game.Screens.Menu
                         rulesetsScale.ScaleTo(0.8f, 1000);
                         rulesets.FadeIn().ScaleTo(1).TransformSpacingTo(new Vector2(200, 0));
                         welcomeText.FadeOut().Expire();
-                        triangles.FadeOut().Expire();
+                        triangles.FadeOut().OnComplete(_ => hapticHandler.PlayTransient(1f, 1f));
                     }
 
                     using (BeginDelayedSequence(rulesets_2))
                     {
-                        rulesets.ScaleTo(2).TransformSpacingTo(new Vector2(30, 0));
+                        rulesets.ScaleTo(2).TransformSpacingTo(new Vector2(30, 0)).OnComplete(_ => hapticHandler.PlayTransient(1f, 1f));
                     }
 
                     using (BeginDelayedSequence(rulesets_3))
                     {
-                        rulesets.ScaleTo(4).TransformSpacingTo(new Vector2(10, 0));
+                        rulesets.ScaleTo(4).TransformSpacingTo(new Vector2(10, 0)).OnComplete(_ => hapticHandler.PlayTransient(1f, 1f));
                         rulesetsScale.ScaleTo(1.3f, 1000);
                     }
 
                     using (BeginDelayedSequence(logo_1))
                     {
-                        rulesets.FadeOut();
+                        rulesets.FadeOut().OnComplete(_ => hapticHandler.PlayTransient(1f, 1f));
 
                         // matching flyte curve y = 0.25x^2 + (max(0, x - 0.7) / 0.3) ^ 5
                         lazerLogo.FadeIn().ScaleTo(scale_start).Then().Delay(logo_scale_duration * 0.7f).ScaleTo(scale_start - scale_adjust, logo_scale_duration * 0.3f, Easing.InQuint);
@@ -255,6 +259,7 @@ namespace osu.Game.Screens.Menu
                             showBackgroundAction();
 
                             game.Add(new GameWideFlash());
+                            hapticHandler.Crash(durationSeconds: 1f);
 
                             LoadMenu();
                         });
@@ -352,6 +357,9 @@ namespace osu.Game.Screens.Menu
 
             private partial class GlitchingTriangles : CompositeDrawable
             {
+                [Resolved]
+                private IHapticHandler hapticHandler { get; set; }
+
                 public GlitchingTriangles()
                 {
                     RelativeSizeAxes = Axes.Both;
@@ -376,6 +384,7 @@ namespace osu.Game.Screens.Menu
                         };
 
                         AddInternal(triangle);
+                        hapticHandler.PlayTransient(0.25f, 0.5f);
 
                         triangle.FadeOutFromOne(120);
                     }

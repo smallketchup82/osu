@@ -13,6 +13,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.UserInterface;
+using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.IO.Stores;
 using osu.Game.Rulesets;
@@ -28,6 +29,9 @@ namespace osu.Game.Overlays.Toolbar
 
         [Resolved]
         private MusicController musicController { get; set; }
+
+        [Resolved]
+        private IHapticHandler hapticHandler { get; set; }
 
         private readonly Dictionary<RulesetInfo, Sample> rulesetSelectionSample = new Dictionary<RulesetInfo, Sample>();
         private readonly Dictionary<RulesetInfo, SampleChannel> rulesetSelectionChannel = new Dictionary<RulesetInfo, SampleChannel>();
@@ -81,7 +85,49 @@ namespace osu.Game.Overlays.Toolbar
 
             defaultSelectSample = audio.Samples.Get(@"UI/default-select");
 
+            Current.ValueChanged += playRulesetSelectionHaptic;
             Current.ValueChanged += playRulesetSelectionSample;
+        }
+
+        private void playRulesetSelectionHaptic(ValueChangedEvent<RulesetInfo> r)
+        {
+            if (r.OldValue == null)
+                return;
+
+            switch (r.NewValue.ShortName)
+            {
+                case "osu":
+                case "fruits":
+                    hapticHandler.Crash();
+                    break;
+
+                case "taiko":
+                    hapticHandler.PlayTransient(1f, 1f);
+                    Scheduler.AddDelayed(() =>
+                    {
+                        hapticHandler.PlayTransient(1f, 1f);
+                    }, 100);
+
+                    Scheduler.AddDelayed(() =>
+                    {
+                        hapticHandler.Crash();
+                    }, 200);
+                    break;
+
+                case "mania":
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int i1 = i;
+                        Scheduler.AddDelayed(() =>
+                        {
+                            hapticHandler.PlayTransient(1f, 1f);
+                            if (i1 == 3)
+                                hapticHandler.Crash();
+                        }, i * 150);
+                    }
+
+                    break;
+            }
         }
 
         protected override void LoadComplete()

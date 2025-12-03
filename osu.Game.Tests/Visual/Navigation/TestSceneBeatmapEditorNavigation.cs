@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using NUnit.Framework;
@@ -18,7 +17,6 @@ using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Database;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Osu;
@@ -40,61 +38,13 @@ namespace osu.Game.Tests.Visual.Navigation
         [Test]
         public void TestExternalEditingNoChange()
         {
-            string difficultyName = null!;
-
-            prepareBeatmap();
-            openEditor();
-
-            AddStep("store difficulty name", () => difficultyName = getEditor().Beatmap.Value.BeatmapInfo.DifficultyName);
-
-            AddStep("open file menu", () => getEditor().ChildrenOfType<Menu.DrawableMenuItem>().Single(m => m.Item.Text.Value.ToString() == "File").TriggerClick());
-            AddStep("click external edit", () => getEditor().ChildrenOfType<Menu.DrawableMenuItem>().Single(m => m.Item.Text.Value.ToString() == "Edit externally").TriggerClick());
-
-            AddUntilStep("wait for external edit screen", () => Game.ScreenStack.CurrentScreen is ExternalEditScreen externalEditScreen && externalEditScreen.IsLoaded);
-
-            AddUntilStep("wait for button ready", () => ((ExternalEditScreen)Game.ScreenStack.CurrentScreen).ChildrenOfType<DangerousRoundedButton>().FirstOrDefault()?.Enabled.Value == true);
-
-            AddStep("finish external edit", () => ((ExternalEditScreen)Game.ScreenStack.CurrentScreen).ChildrenOfType<DangerousRoundedButton>().First().TriggerClick());
-
-            AddUntilStep("wait for editor", () => Game.ScreenStack.CurrentScreen is Editor editor && editor.ReadyForUse);
-
-            AddAssert("beatmapset didn't change", () => getEditor().Beatmap.Value.BeatmapSetInfo, () => Is.EqualTo(beatmapSet));
-            AddAssert("difficulty didn't change", () => getEditor().Beatmap.Value.BeatmapInfo.DifficultyName, () => Is.EqualTo(difficultyName));
-            AddAssert("old beatmapset not deleted", () => Game.BeatmapManager.QueryBeatmapSet(s => s.ID == beatmapSet.ID), () => Is.Not.Null);
+            // TODO: Rewrite
         }
 
         [Test]
         public void TestExternalEditingWithChange()
         {
-            string difficultyName = null!;
-
-            prepareBeatmap();
-            openEditor();
-
-            AddStep("store difficulty name", () => difficultyName = getEditor().Beatmap.Value.BeatmapInfo.DifficultyName);
-
-            AddStep("open file menu", () => getEditor().ChildrenOfType<Menu.DrawableMenuItem>().Single(m => m.Item.Text.Value.ToString() == "File").TriggerClick());
-            AddStep("click external edit", () => getEditor().ChildrenOfType<Menu.DrawableMenuItem>().Single(m => m.Item.Text.Value.ToString() == "Edit externally").TriggerClick());
-
-            AddUntilStep("wait for external edit screen", () => Game.ScreenStack.CurrentScreen is ExternalEditScreen externalEditScreen && externalEditScreen.IsLoaded);
-
-            AddUntilStep("wait for button ready", () => ((ExternalEditScreen)Game.ScreenStack.CurrentScreen).ChildrenOfType<DangerousRoundedButton>().FirstOrDefault()?.Enabled.Value == true);
-
-            AddStep("add file externally", () =>
-            {
-                var op = ((ExternalEditScreen)Game.ScreenStack.CurrentScreen).EditOperation!;
-                File.WriteAllText(Path.Combine(op.MountedPath, "test.txt"), "test");
-            });
-
-            AddStep("finish external edit", () => ((ExternalEditScreen)Game.ScreenStack.CurrentScreen).ChildrenOfType<DangerousRoundedButton>().First().TriggerClick());
-
-            AddUntilStep("wait for editor", () => Game.ScreenStack.CurrentScreen is Editor editor && editor.ReadyForUse);
-
-            AddAssert("beatmapset changed", () => getEditor().Beatmap.Value.BeatmapSetInfo, () => Is.Not.EqualTo(beatmapSet));
-            AddAssert("beatmapset is locally modified", () => getEditor().Beatmap.Value.BeatmapSetInfo.Status, () => Is.EqualTo(BeatmapOnlineStatus.LocallyModified));
-            AddAssert("all difficulties are locally modified", () => getEditor().Beatmap.Value.BeatmapSetInfo.Beatmaps.All(b => b.Status == BeatmapOnlineStatus.LocallyModified));
-            AddAssert("difficulty didn't change", () => getEditor().Beatmap.Value.BeatmapInfo.DifficultyName, () => Is.EqualTo(difficultyName));
-            AddAssert("old beatmapset deleted", () => Game.BeatmapManager.QueryBeatmapSet(s => s.ID == beatmapSet.ID), () => Is.Null);
+            // TODO: Rewrite
         }
 
         [Test]

@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions;
@@ -16,6 +17,7 @@ using osu.Framework.Input.Events;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Testing;
+using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -25,10 +27,12 @@ using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Input.Bindings;
 using osu.Game.Localisation;
 using osu.Game.Online.Multiplayer;
+using osu.Game.Screens.Edit;
 using osu.Game.Screens.OnlinePlay.Match.Components;
 using osu.Game.Skinning;
 using osuTK;
 using osuTK.Graphics;
+using Realms;
 
 namespace osu.Game.Overlays.SkinEditor
 {
@@ -46,7 +50,12 @@ namespace osu.Game.Overlays.SkinEditor
         [Resolved]
         private SkinManager skinManager { get; set; } = null!;
 
-        private ExternalEditOperation<SkinInfo>? editOperation;
+        [Resolved]
+        private BeatmapManager beatmapManager { get; set; } = null!;
+
+        private Editor? editor;
+
+        private IExternalEditOperation? editOperation;
         private TaskCompletionSource? taskCompletionSource;
         private bool finishingEdit;
 
@@ -101,20 +110,47 @@ namespace osu.Game.Overlays.SkinEditor
             gameHost.ExitRequested += tryFinishOnExit;
         }
 
-        public async Task<Task> Begin(SkinInfo skinInfo)
+        public async Task<Task> Begin(IHasGuidPrimaryKey realmObject, Editor? providedEditor = null)
         {
             if (taskCompletionSource != null)
                 throw new InvalidOperationException("Cannot start multiple concurrent external edits!");
 
             Show();
-            showSpinner("Mounting external skin...");
-            setGlobalSkinDisabled(true);
+
+            switch (realmObject)
+            {
+                case SkinInfo:
+                    showSpinner("Mounting external skin...");
+                    setGlobalSkinDisabled(true);
+                    break;
+
+                case BeatmapSetInfo:
+                    showSpinner("Mounting external beatmap...");
+                    break;
+
+                default:
+                    throw new ArgumentException($"Unsupported skin info type: {realmObject.GetType().FullName}", nameof(realmObject));
+            }
+
+            editor = providedEditor;
 
             await Task.Delay(500).ConfigureAwait(true);
 
             try
             {
-                editOperation = await skinManager.BeginExternalEditing(skinInfo).ConfigureAwait(false);
+                switch (realmObject)
+                {
+                    case SkinInfo skinInfo:
+                        editOperation = new ExternalEditWrapper<SkinInfo>(await skinManager.BeginExternalEditing(skinInfo).ConfigureAwait(false));
+                        break;
+
+                    case BeatmapSetInfo beatmapSetInfo:
+                        editOperation = new ExternalEditWrapper<BeatmapSetInfo>(await beatmapManager.BeginExternalEditing(beatmapSetInfo).ConfigureAwait(false));
+                        break;
+
+                    default:
+                        throw new ArgumentException($"Unsupported realm object type: {realmObject.GetType().FullName}", nameof(realmObject));
+                }
             }
             catch (Exception ex)
             {
@@ -131,7 +167,7 @@ namespace osu.Game.Overlays.SkinEditor
                 {
                     new OsuSpriteText
                     {
-                        Text = "Skin is mounted externally",
+                        Text = "Item is mounted externally",
                         Font = OsuFont.Default.With(size: 30),
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre,
@@ -198,6 +234,8 @@ namespace osu.Game.Overlays.SkinEditor
 
             Debug.Assert(taskCompletionSource != null);
 
+            string? originalDifficulty = editor?.Beatmap.Value.Beatmap.BeatmapInfo.DifficultyName;
+
             showSpinner("Cleaning up...");
             await Task.Delay(500).ConfigureAwait(true);
 
@@ -216,20 +254,55 @@ namespace osu.Game.Overlays.SkinEditor
                 return;
             }
 
-            Schedule(() =>
+            switch (editOperation)
             {
-                var oldSkin = skinManager.CurrentSkin!.Value;
-                var newSkinInfo = oldSkin.SkinInfo.PerformRead(s => s);
+                case ExternalEditWrapper<SkinInfo>:
+                    Schedule(() =>
+                    {
+                        var oldSkin = skinManager.CurrentSkin!.Value;
+                        var newSkinInfo = oldSkin.SkinInfo.PerformRead(s => s);
 
-                // Create a new skin instance to ensure the skin is reloaded
-                // If there's a better way to reload the skin, this should be replaced with it.
-                setGlobalSkinDisabled(false);
-                skinManager.CurrentSkin.Value = newSkinInfo.CreateInstance(skinManager);
+                        // Create a new skin instance to ensure the skin is reloaded
+                        // If there's a better way to reload the skin, this should be replaced with it.
+                        setGlobalSkinDisabled(false);
+                        skinManager.CurrentSkin.Value = newSkinInfo.CreateInstance(skinManager);
 
-                oldSkin.Dispose();
+                        oldSkin.Dispose();
+                        Hide();
+                    });
+                    break;
 
-                Hide();
-            });
+                case ExternalEditWrapper<BeatmapSetInfo> beatmapEdit:
+                    Schedule(() =>
+                    {
+                        Live<BeatmapSetInfo>? beatmap = beatmapEdit.Result;
+
+                        if (beatmap == null)
+                        {
+                            Schedule(Hide);
+                            return;
+                        }
+
+                        Debug.Assert(editor != null);
+
+                        beatmap.PerformWrite(s =>
+                        {
+                            if (s.Status == BeatmapOnlineStatus.None)
+                                s.Status = BeatmapOnlineStatus.LocallyModified;
+                            foreach (var difficulty in s.Beatmaps.Where(b => b.Status == BeatmapOnlineStatus.None))
+                                difficulty.Status = BeatmapOnlineStatus.LocallyModified;
+                        });
+
+                        var closestMatchingBeatmap =
+                            beatmap.Value.Beatmaps.FirstOrDefault(b => b.DifficultyName == originalDifficulty)
+                            ?? beatmap.Value.Beatmaps.First();
+
+                        editor!.SwitchToDifficulty(closestMatchingBeatmap);
+                        Hide();
+                    });
+                    break;
+            }
+
             taskCompletionSource.SetResult();
             taskCompletionSource = null;
         }
@@ -304,6 +377,37 @@ namespace osu.Game.Overlays.SkinEditor
                 gameHost.ExitRequested -= tryFinishOnExit;
 
             base.Dispose(isDisposing);
+        }
+    }
+
+    internal interface IExternalEditOperation
+    {
+        string MountedPath { get; }
+        Task Finish();
+    }
+
+    internal abstract class ExternalEditWrapper : IExternalEditOperation
+    {
+        public abstract string MountedPath { get; }
+        public abstract Task Finish();
+    }
+
+    internal class ExternalEditWrapper<T> : ExternalEditWrapper where T : class, IHasGuidPrimaryKey, IRealmObject
+    {
+        private readonly ExternalEditOperation<T> operation;
+
+        public Live<T>? Result { get; private set; }
+
+        public ExternalEditWrapper(ExternalEditOperation<T> operation)
+        {
+            this.operation = operation;
+        }
+
+        public override string MountedPath => operation.MountedPath;
+
+        public override async Task Finish()
+        {
+            Result = await operation.Finish().ConfigureAwait(false);
         }
     }
 }

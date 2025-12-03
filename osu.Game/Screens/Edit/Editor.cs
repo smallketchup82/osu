@@ -42,6 +42,7 @@ using osu.Game.Online.Multiplayer;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.OSD;
+using osu.Game.Overlays.SkinEditor;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Objects;
@@ -212,6 +213,17 @@ namespace osu.Game.Screens.Edit
 
         [Cached]
         private readonly OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Aquamarine);
+
+        [Resolved(canBeNull: true)]
+        [CanBeNull]
+        private IOverlayManager overlayManager { get; set; }
+
+        [Resolved(canBeNull: true)]
+        [CanBeNull]
+        private ExternalEditOverlay externalEditOverlay { get; set; }
+
+        [CanBeNull]
+        private IDisposable externalEditOverlayRegistration;
 
         [Resolved(canBeNull: true)]
         private OnScreenDisplay onScreenDisplay { get; set; }
@@ -495,6 +507,14 @@ namespace osu.Game.Screens.Edit
                 foreach (var item in saveRelatedMenuItems)
                     item.Action.Disabled = MutationTracker.InProgress.Value;
             }, true);
+
+            if (externalEditOverlay == null)
+            {
+                externalEditOverlay = new ExternalEditOverlay();
+                dependencies.Cache(externalEditOverlay);
+            }
+
+            externalEditOverlayRegistration = overlayManager?.RegisterBlockingOverlay(externalEditOverlay);
         }
 
         protected override void Dispose(bool isDisposing)
@@ -503,6 +523,9 @@ namespace osu.Game.Screens.Edit
 
             // redundant (should have happened via a `resetTrack()` call in `OnExiting()`), but done for safety
             musicController.TrackChanged -= onTrackChanged;
+
+            externalEditOverlayRegistration?.Dispose();
+            externalEditOverlayRegistration = null;
         }
 
         private void onTrackChanged(WorkingBeatmap working, TrackChangeDirection direction) => clock.ChangeSource(working.Track);
@@ -1345,18 +1368,21 @@ namespace osu.Game.Screens.Edit
                     if (!Save())
                         return false;
 
-                    startEdit();
+                    _ = startEdit();
                     return true;
                 })));
             }
             else
             {
-                startEdit();
+                _ = startEdit();
             }
 
-            void startEdit()
+            async Task startEdit()
             {
-                this.Push(new ExternalEditScreen());
+                if (externalEditOverlay == null)
+                    return;
+
+                await externalEditOverlay.Begin(editorBeatmap.BeatmapInfo.BeatmapSet!, this).ConfigureAwait(false);
             }
         }
 

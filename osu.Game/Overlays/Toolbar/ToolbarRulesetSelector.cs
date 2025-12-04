@@ -31,7 +31,7 @@ namespace osu.Game.Overlays.Toolbar
         private MusicController musicController { get; set; }
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; }
+        private HapticManager hapticManager { get; set; }
 
         private readonly Dictionary<RulesetInfo, Sample> rulesetSelectionSample = new Dictionary<RulesetInfo, Sample>();
         private readonly Dictionary<RulesetInfo, SampleChannel> rulesetSelectionChannel = new Dictionary<RulesetInfo, SampleChannel>();
@@ -98,19 +98,19 @@ namespace osu.Game.Overlays.Toolbar
             {
                 case "osu":
                 case "fruits":
-                    hapticHandler.Crash();
+                    hapticManager.Crash();
                     break;
 
                 case "taiko":
-                    hapticHandler.PlayTransient(1f, 1f);
+                    hapticManager.PlayTransient(1f, 1f);
                     Scheduler.AddDelayed(() =>
                     {
-                        hapticHandler.PlayTransient(1f, 1f);
+                        hapticManager.PlayTransient(1f, 1f);
                     }, 100);
 
                     Scheduler.AddDelayed(() =>
                     {
-                        hapticHandler.Crash();
+                        hapticManager.Crash();
                     }, 200);
                     break;
 
@@ -120,9 +120,9 @@ namespace osu.Game.Overlays.Toolbar
                         int i1 = i;
                         Scheduler.AddDelayed(() =>
                         {
-                            hapticHandler.PlayTransient(1f, 1f);
+                            hapticManager.PlayTransient(1f, 1f);
                             if (i1 == 3)
-                                hapticHandler.Crash();
+                                hapticManager.Crash();
                         }, i * 150);
                     }
 

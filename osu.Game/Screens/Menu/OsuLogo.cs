@@ -109,7 +109,7 @@ namespace osu.Game.Screens.Menu
         public override bool IsPresent => base.IsPresent || Scheduler.HasPendingTasks;
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; }
+        private HapticManager hapticManager { get; set; }
 
         public OsuLogo()
         {
@@ -428,7 +428,7 @@ namespace osu.Game.Screens.Menu
                 StopSamplePlayback();
                 sampleClickChannel = sampleClick.GetChannel();
                 sampleClickChannel.Play();
-                hapticHandler.PlayTransient(1.0f, 0.75f);
+                hapticManager.PlayTransient(1.0f, 0.75f);
             }
         }
 

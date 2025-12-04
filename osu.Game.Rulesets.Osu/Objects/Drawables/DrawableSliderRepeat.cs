@@ -28,7 +28,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         public Slider Slider => DrawableSlider?.HitObject;
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; }
+        private HapticManager hapticManager { get; set; }
 
         public DrawableSlider DrawableSlider => (DrawableSlider)ParentHitObject;
 
@@ -116,7 +116,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     this.FadeOut(animDuration, Easing.Out);
                     int sampleVolume = HitObject.Samples.First().Volume;
                     float volume = Math.Clamp(sampleVolume / 100f, 0, 1);
-                    hapticHandler.PlayTransient(volume, 1f);
+                    hapticManager.PlayTransient(volume, 1f);
                     break;
             }
         }

@@ -40,7 +40,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         Drawable IHasApproachCircle.ApproachCircle => ApproachCircle;
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; } = null!;
+        private HapticManager hapticManager { get; set; } = null!;
 
         private Container scaleContainer = null!;
         private ShakeContainer shakeContainer = null!;
@@ -225,7 +225,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     // Clamp and scale accordingly, the minimum intensity should be 0.8f, and the volume should only affect the other 0.2f
                     // float intensity = Math.Clamp(hitObjectVolume, 0, 1) * 0.2f + 0.8f;
 
-                    hapticHandler.PlayTransient(hitObjectVolume, 1f);
+                    hapticManager.PlayTransient(hitObjectVolume, 1f);
 
                     // if (this is DrawableSliderHead head)
                     // {
@@ -234,7 +234,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     //     // Volume is 0-100 in hitObject, but 0-1 in haptics. Plus, we want to limit the max intensity to 0.3f for sliders
                     //     float sliderVolume = Math.Clamp(sliderSampleVolume / 100f, 0, 1) * 0.3f;
                     //
-                    //     hapticHandler.StartContinuous(sliderVolume);
+                    //     hapticManager.StartContinuous(sliderVolume);
                     // }
 
                     break;

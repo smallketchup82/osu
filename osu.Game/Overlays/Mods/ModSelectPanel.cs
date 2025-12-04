@@ -67,7 +67,7 @@ namespace osu.Game.Overlays.Mods
         protected OverlayColourProvider ColourProvider { get; private set; } = null!;
 
         [Resolved]
-        protected IHapticHandler HapticHandler { get; private set; } = null!;
+        protected HapticManager HapticManager { get; private set; } = null!;
 
         private readonly OsuSpriteText titleText;
         private readonly OsuSpriteText descriptionText;
@@ -202,9 +202,9 @@ namespace osu.Game.Overlays.Mods
         private void playStateChangedHaptics()
         {
             if (Active.Value)
-                HapticHandler.ToggleOn();
+                HapticManager.ToggleOn();
             else
-                HapticHandler.ToggleOff();
+                HapticManager.ToggleOff();
         }
 
         private void playStateChangeSamples()

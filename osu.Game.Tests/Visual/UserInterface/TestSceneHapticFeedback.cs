@@ -18,7 +18,7 @@ namespace osu.Game.Tests.Visual.UserInterface
     public partial class TestSceneHapticFeedback : OsuManualInputManagerTestScene
     {
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; } = null!;
+        private HapticManager hapticManager { get; set; } = null!;
 
         private readonly BindableBool continuousHapticEnabled = new BindableBool();
         private readonly BindableNumber<float> transientIntensity = new BindableNumber<float>(1.0f) { MinValue = 0.0f, MaxValue = 1.0f, Precision = 0.1f };
@@ -69,7 +69,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                     new SettingsButton
                     {
                         Text = "Trigger Transient Haptic",
-                        Action = () => hapticHandler.PlayTransient(transientIntensity.Value, transientSharpness.Value),
+                        Action = () => hapticManager.PlayTransient(transientIntensity.Value, transientSharpness.Value),
                         EnableHaptics = false
                     },
                     new SettingsButton
@@ -88,13 +88,13 @@ namespace osu.Game.Tests.Visual.UserInterface
                     new SettingsButton
                     {
                         Text = "Button Press",
-                        Action = () => hapticHandler.ButtonPress(),
+                        Action = () => hapticManager.ButtonPress(),
                         EnableHaptics = false
                     },
                     new SettingsButton
                     {
                         Text = "Selection Changed",
-                        Action = () => hapticHandler.SelectionChanged(),
+                        Action = () => hapticManager.SelectionChanged(),
                         EnableHaptics = false
                     },
                     new OsuCheckbox
@@ -106,25 +106,25 @@ namespace osu.Game.Tests.Visual.UserInterface
                     new SettingsButton
                     {
                         Text = "Success Notification",
-                        Action = () => hapticHandler.SuccessNotification(),
+                        Action = () => hapticManager.SuccessNotification(),
                         EnableHaptics = false
                     },
                     new SettingsButton
                     {
                         Text = "Warning Notification",
-                        Action = () => hapticHandler.WarningNotification(),
+                        Action = () => hapticManager.WarningNotification(),
                         EnableHaptics = false
                     },
                     new SettingsButton
                     {
                         Text = "Error Notification",
-                        Action = () => hapticHandler.ErrorNotification(),
+                        Action = () => hapticManager.ErrorNotification(),
                         EnableHaptics = false
                     },
                     new SettingsButton
                     {
                         Text = "Crash",
-                        Action = () => hapticHandler.Crash(transientIntensity.Value, transientSharpness.Value, crashDuration.Value),
+                        Action = () => hapticManager.Crash(transientIntensity.Value, transientSharpness.Value, crashDuration.Value),
                         EnableHaptics = false
                     },
                 }
@@ -136,17 +136,17 @@ namespace osu.Game.Tests.Visual.UserInterface
             continuousHapticEnabled.BindValueChanged(enabled =>
             {
                 if (enabled.NewValue)
-                    hapticHandler.StartContinuous(transientIntensity.Value, transientSharpness.Value);
+                    hapticManager.StartContinuous(transientIntensity.Value, transientSharpness.Value);
                 else
-                    hapticHandler.ReleaseContinuous();
+                    hapticManager.ReleaseContinuous();
             });
 
             toggleState.BindValueChanged(state =>
             {
                 if (state.NewValue)
-                    hapticHandler.ToggleOn();
+                    hapticManager.ToggleOn();
                 else
-                    hapticHandler.ToggleOff();
+                    hapticManager.ToggleOff();
             });
         });
     }

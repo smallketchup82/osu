@@ -62,7 +62,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         public PlaySliderBody SliderBody => Body.Drawable as PlaySliderBody;
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; }
+        private HapticManager hapticManager { get; set; }
 
         public IBindable<int> PathVersion => pathVersion;
         private readonly Bindable<int> pathVersion = new Bindable<int>();
@@ -253,8 +253,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     {
                         slidingSample.Play();
                         double sliderSampleVolume = slidingSample.Volume.Value;
-                        float sliderVolume = Math.Clamp((float)sliderSampleVolume, 0, 1) * IHapticHandler.DEFAULT_SLIDER_INTENSITY;
-                        hapticHandler.StartContinuous(sliderVolume);
+                        hapticManager.StartContinuous((float)sliderSampleVolume * 0.3f);
                     }
 
                     slidingSample.Balance.Value = CalculateSamplePlaybackBalance(CalculateDrawableRelativePosition(Ball));
@@ -262,11 +261,10 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                 else if (slidingSample.IsPlaying || slidingSample.RequestedPlaying)
                 {
                     slidingSample.Stop();
-                    hapticHandler.ReleaseContinuous();
+                    hapticManager.ReleaseContinuous();
                     int sampleVolume = HitObject.TailSamples.First().Volume;
-                    float volume = Math.Clamp(sampleVolume / 100f, 0, 1);
 
-                    hapticHandler.PlayTransient(volume, 1.0f);
+                    hapticManager.PlayTransient(HapticManager.ClampToUnit(sampleVolume), 1.0f);
                 }
             }
         }

@@ -22,7 +22,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         public const float DEFAULT_TICK_SIZE = 16;
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; }
+        private HapticManager hapticManager { get; set; }
 
         protected DrawableSlider DrawableSlider => (DrawableSlider)ParentHitObject;
 
@@ -98,7 +98,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                 case ArmedState.Hit:
                     this.FadeOut(ANIM_DURATION, Easing.OutQuint);
                     this.ScaleTo(Scale * 1.5f, ANIM_DURATION, Easing.Out);
-                    hapticHandler.PlayTransient(0.25f, 1f);
+                    hapticManager.PlayTransient(0.25f, 1f);
                     break;
             }
         }

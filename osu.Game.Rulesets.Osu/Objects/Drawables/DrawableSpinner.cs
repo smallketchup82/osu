@@ -71,7 +71,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         public readonly IBindable<double> SpinsPerMinute = new BindableDouble();
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; }
+        private HapticManager hapticManager { get; set; }
 
         private const double fade_out_duration = 240;
 
@@ -175,7 +175,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             if (!tracking.NewValue)
             {
                 // stopped spinning, stop continuous haptics
-                hapticHandler.ReleaseContinuous();
+                hapticManager.ReleaseContinuous();
             }
         }
 
@@ -299,7 +299,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
             // Haptic feedback intensity modulation based on spinner progress.
             if (spinnerFrequencyModulate && Progress < 1.0f)
-                hapticHandler.UpdateIntensity(Math.Clamp(Progress, 0, 0.75f));
+                hapticManager.UpdateIntensity(Math.Clamp(Progress, 0, 0.75f));
 
             // Ticks can theoretically be judged at any point in the spinner's duration.
             // A tick must be alive to correctly play back samples,
@@ -380,7 +380,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     tick.TriggerResult(true);
 
                 if (Math.Abs(Progress - 1.0f) < Precision.FLOAT_EPSILON)
-                    hapticHandler.PlayTransient(1f, 1f);
+                    hapticManager.PlayTransient(1f, 1f);
 
                 completedFullSpins.Value++;
             }

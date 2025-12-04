@@ -81,7 +81,7 @@ namespace osu.Game.Screens.Menu
         private SampleChannel? sampleChannel;
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; } = null!;
+        private HapticManager hapticManager { get; set; } = null!;
 
         public override bool IsPresent => base.IsPresent
                                           // Allow keyboard interaction based on state rather than waiting for delayed animations.
@@ -300,7 +300,7 @@ namespace osu.Game.Screens.Menu
             sampleChannel = sampleClick?.GetChannel();
             sampleChannel?.Play();
 
-            hapticHandler.ButtonPress();
+            hapticManager.ButtonPress();
 
             clickAction?.Invoke(this, e);
 

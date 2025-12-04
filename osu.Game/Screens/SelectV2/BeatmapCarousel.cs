@@ -57,7 +57,7 @@ namespace osu.Game.Screens.SelectV2
 
         private IBindableList<BeatmapSetInfo> detachedBeatmaps = null!;
 
-        private IHapticHandler hapticHandler = null!;
+        private HapticManager hapticManager = null!;
 
         private readonly LoadingLayer loading;
 
@@ -122,11 +122,11 @@ namespace osu.Game.Screens.SelectV2
         }
 
         [BackgroundDependencyLoader]
-        private void load(BeatmapStore beatmapStore, AudioManager audio, OsuConfigManager config, CancellationToken? cancellationToken, IHapticHandler hapticHandler)
+        private void load(BeatmapStore beatmapStore, AudioManager audio, OsuConfigManager config, CancellationToken? cancellationToken, HapticManager hapticManager)
         {
             setupPools();
             detachedBeatmaps = beatmapStore.GetBeatmapSets(cancellationToken);
-            this.hapticHandler = hapticHandler;
+            this.hapticManager = hapticManager;
             loadSamples(audio);
 
             config.BindWith(OsuSetting.RandomSelectAlgorithm, randomAlgorithm);
@@ -420,15 +420,15 @@ namespace osu.Game.Screens.SelectV2
             switch (item.Model)
             {
                 case GroupDefinition:
-                    hapticHandler.ButtonPress();
+                    hapticManager.ButtonPress();
                     break;
 
                 case GroupedBeatmapSet:
-                    hapticHandler.ButtonPress();
+                    hapticManager.ButtonPress();
                     break;
 
                 case GroupedBeatmap:
-                    hapticHandler.SelectionChanged();
+                    hapticManager.SelectionChanged();
                     break;
             }
         }

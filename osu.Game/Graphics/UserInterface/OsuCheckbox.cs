@@ -47,7 +47,7 @@ namespace osu.Game.Graphics.UserInterface
         protected readonly Nub Nub;
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; } = null!;
+        private HapticManager hapticManager { get; set; } = null!;
 
         protected readonly OsuTextFlowContainer LabelTextFlowContainer;
         private Sample sampleChecked;
@@ -128,9 +128,9 @@ namespace osu.Game.Graphics.UserInterface
             if (!EnableHaptics) return;
 
             if (value)
-                hapticHandler.ToggleOn();
+                hapticManager.ToggleOn();
             else
-                hapticHandler.ToggleOff();
+                hapticManager.ToggleOff();
         }
     }
 }

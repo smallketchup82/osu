@@ -53,7 +53,7 @@ namespace osu.Game.Screens.SelectV2
         private OsuGame? game { get; set; }
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; } = null!;
+        private HapticManager hapticManager { get; set; } = null!;
 
         private Sample? sampleConfirmSelection { get; set; }
 
@@ -127,7 +127,7 @@ namespace osu.Game.Screens.SelectV2
                 Mods.Value = mods;
             }
 
-            hapticHandler.Crash();
+            hapticManager.Crash();
             sampleConfirmSelection?.Play();
 
             this.Push(playerLoader = new PlayerLoader(createPlayer));

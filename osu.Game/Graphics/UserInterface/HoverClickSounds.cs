@@ -25,7 +25,7 @@ namespace osu.Game.Graphics.UserInterface
         public Bindable<bool> Enabled = new Bindable<bool>(true);
 
         [Resolved]
-        private IHapticHandler hapticHandler { get; set; }
+        private HapticManager hapticManager { get; set; }
 
         private Sample sampleClick;
         private Sample sampleClickDisabled;
@@ -64,7 +64,7 @@ namespace osu.Game.Graphics.UserInterface
                 return base.OnClick(e);
 
             if (ShouldPlayHaptics)
-                hapticHandler.ButtonPress();
+                hapticManager.ButtonPress();
 
             PlayClickSample();
 

@@ -218,25 +218,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     ApproachCircle.FadeOut();
 
                     float hitObjectVolume = HitObject.Samples.First().Volume;
-
-                    // Volume is 0-100 in hitObject, but 0-1 in haptics
-                    hitObjectVolume /= 100f;
-
-                    // Clamp and scale accordingly, the minimum intensity should be 0.8f, and the volume should only affect the other 0.2f
-                    // float intensity = Math.Clamp(hitObjectVolume, 0, 1) * 0.2f + 0.8f;
-
-                    hapticManager.PlayTransient(hitObjectVolume, 1f);
-
-                    // if (this is DrawableSliderHead head)
-                    // {
-                    //     int sliderSampleVolume = head.DrawableSlider.HitObject.CreateSlidingSamples().First().Volume;
-                    //
-                    //     // Volume is 0-100 in hitObject, but 0-1 in haptics. Plus, we want to limit the max intensity to 0.3f for sliders
-                    //     float sliderVolume = Math.Clamp(sliderSampleVolume / 100f, 0, 1) * 0.3f;
-                    //
-                    //     hapticManager.StartContinuous(sliderVolume);
-                    // }
-
+                    hapticManager.PlayTransient(HapticManager.ClampToUnit(hitObjectVolume), 1f);
                     break;
 
                 case ArmedState.Idle:

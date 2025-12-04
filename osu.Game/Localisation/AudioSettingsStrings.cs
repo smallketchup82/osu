@@ -15,6 +15,11 @@ namespace osu.Game.Localisation
         public static LocalisableString AudioSectionHeader => new TranslatableString(getKey(@"audio_section_header"), @"Audio");
 
         /// <summary>
+        /// "Audio & Haptics"
+        /// </summary>
+        public static LocalisableString MobileAudioSectionHeader => new TranslatableString(getKey(@"mobile_audio_section_header"), @"Audio & Haptics");
+
+        /// <summary>
         /// "Devices"
         /// </summary>
         public static LocalisableString AudioDevicesHeader => new TranslatableString(getKey(@"audio_devices_header"), @"Devices");

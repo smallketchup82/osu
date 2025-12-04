@@ -3,9 +3,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using osu.Framework;
+using osu.Framework.Allocation;
 using osu.Framework.Localisation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input;
 using osu.Game.Graphics;
 using osu.Game.Localisation;
 using osu.Game.Overlays.Settings.Sections.Audio;
@@ -14,7 +17,10 @@ namespace osu.Game.Overlays.Settings.Sections
 {
     public partial class AudioSection : SettingsSection
     {
-        public override LocalisableString Header => AudioSettingsStrings.AudioSectionHeader;
+        public override LocalisableString Header =>
+            RuntimeInfo.IsMobile
+                ? AudioSettingsStrings.MobileAudioSectionHeader
+                : AudioSettingsStrings.AudioSectionHeader;
 
         public override Drawable CreateIcon() => new SpriteIcon
         {
@@ -23,14 +29,16 @@ namespace osu.Game.Overlays.Settings.Sections
 
         public override IEnumerable<LocalisableString> FilterTerms => base.FilterTerms.Concat(new LocalisableString[] { "sound" });
 
-        public AudioSection()
+        [BackgroundDependencyLoader]
+        private void load(HapticManager hapticManager)
         {
-            Children = new Drawable[]
-            {
-                new AudioDevicesSettings(),
-                new VolumeSettings(),
-                new OffsetSettings(),
-            };
+            Add(new AudioDevicesSettings());
+            Add(new VolumeSettings());
+
+            if (RuntimeInfo.IsMobile && hapticManager.SupportsHaptics)
+                Add(new HapticSettings());
+
+            Add(new OffsetSettings());
         }
     }
 }
